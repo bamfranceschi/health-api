@@ -78,7 +78,7 @@ const getRelationship = (client_id, vendor_id) => {
 
 //remove vendor relationship- expects relationship id
 const removeVendor = (id) => {
-  return db("relationships").where({ id: id }).del();
+  return db("relationships").where({ id }).del();
 };
 
 module.exports = {

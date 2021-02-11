@@ -130,19 +130,22 @@ router.post("/:id/add-vendor", (req, res) => {
 });
 
 router.delete("/:id/remove-vendor", async (req, res) => {
-  const client_id = req.params.id;
+  const client_id = Number(req.params.id);
   const vendor_id = req.body.vendor_id;
+
+  console.log(client_id, vendor_id);
 
   try {
     const relationship = await clientModel.getRelationship(
       client_id,
       vendor_id
     );
+    console.log(relationship, "relationship_id");
     clientModel.removeVendor(relationship.id).then(() => {
       res.status(200).json({
         message: "successfully removed relationship",
-        vendor_id: vendorId,
-        relationship_id: relationshipId,
+        vendor_id: vendor_id,
+        relationship_id: relationship,
       });
     });
   } catch (error) {
