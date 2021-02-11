@@ -29,15 +29,34 @@ const removeClient = (id) => {
 //vendorInfo
 
 //need return all vendors, grouped by inputs and outputs categories, order lists by schedule
-const vendorInfo = (clientId) => {
-  return (
-    db("vendors")
-      .join("relationships", "vendors.id", "relationships.vendor_id")
-      .select("vendors.name", "vendors.direction", "vendors.schedule")
-      .where("relationships.client_id", "=", clientId)
-      // .groupBy("schedule")
-      .orderBy("schedule")
-  );
+const vendorInputInfo = (client_id) => {
+  return db("vendors")
+    .join("relationships", "vendors.id", "relationships.vendor_id")
+    .select("vendors.name", "vendors.direction", "vendors.schedule")
+    .where(function () {
+      this.where("vendors.direction", "=", "input").orWhere(
+        "vendors.direction",
+        "=",
+        "both"
+      );
+    })
+    .andWhere("relationships.client_id", "=", client_id)
+    .orderBy("schedule");
+};
+
+const vendorOutputInfo = (client_id) => {
+  return db("vendors")
+    .join("relationships", "vendors.id", "relationships.vendor_id")
+    .select("vendors.name", "vendors.direction", "vendors.schedule")
+    .where(function () {
+      this.where("vendors.direction", "=", "output").orWhere(
+        "vendors.direction",
+        "=",
+        "both"
+      );
+    })
+    .andWhere("relationships.client_id", "=", client_id)
+    .orderBy("schedule");
 };
 
 //add new vendor relationship
@@ -46,12 +65,20 @@ const addVendor = (relationship) => {
   return db("relationships").insert(relationship);
 };
 
-//remove vendor relationship- expects relationship id
-
-const removeVendor = ({ clientId, vendorId }) => {
+//get a specific relationship
+const getRelationship = (client_id, vendor_id) => {
   return db("relationships")
-    .where({ client_id: clientId, vendor_id: vendorId })
-    .del();
+    .select("id")
+    .where({
+      client_id: client_id,
+      vendor_id: vendor_id,
+    })
+    .first();
+};
+
+//remove vendor relationship- expects relationship id
+const removeVendor = (id) => {
+  return db("relationships").where({ id: id }).del();
 };
 
 module.exports = {
@@ -60,7 +87,9 @@ module.exports = {
   addNew,
   updateClient,
   removeClient,
-  vendorInfo,
+  vendorInputInfo,
+  vendorOutputInfo,
   addVendor,
+  getRelationship,
   removeVendor,
 };
